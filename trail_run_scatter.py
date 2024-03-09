@@ -32,7 +32,7 @@ try:
         trail_runs = df[(df['type'] == 'Run') & (df['name'].str.contains('Trail', case=False, na=False))] #| (df['name'] == 'Leadville 100'))]
         trail_runs['start_date'] = pd.to_datetime(trail_runs['start_date'])
         trail_runs_2_years = trail_runs[
-            (trail_runs['start_date'].dt.tz_localize(None) >= (pd.to_datetime('today') - pd.DateOffset(months=3)).tz_localize(None))
+            (trail_runs['start_date'].dt.tz_localize(None) >= (pd.to_datetime('today') - pd.DateOffset(months=12)).tz_localize(None))
         ]
 
         # Convert elevation from meters to feet
@@ -40,44 +40,20 @@ try:
         # Convert meters per second to mph
         trail_runs_2_years['average_speed'] *= 2.23694
         # Create a figure with two y-axes
-        fig = px.bar(
-            trail_runs_2_years,
-            x='start_date',
-            y='average_heartrate',
-            color='average_speed',
-            color_continuous_scale='Plasma',
-            range_x=[
-                    trail_runs_2_years['start_date'].min() - pd.DateOffset(days=3),
-                    trail_runs_2_years['start_date'].max() + pd.DateOffset(days=3),
-                    ],  # Add padding to both sides
-            title='Trail Run Metrics (Last 12 Months)',
-            labels={'average_heartrate': 'Average Heart Rate', 'start_date': 'Date', 'average_speed': 'Avg Speed (Mph)'}
-        )
+        fig = px.scatter(
+        trail_runs_2_years,
+        x='average_speed',
+        y='total_elevation_gain',
+        title='Elevation Gain vs Speed with Heart Rate',
+        labels={'total_elevation_gain': 'Total Elevation Gain (ft)', 'average_speed': 'Average Speed (mph)'},
+        color='average_heartrate',
+        size='average_heartrate',
+        hover_data=['start_date', 'name'],
+        color_continuous_scale='bluered',
+     )
 
-        # Add elevation line using the second y-axis
-        fig.add_trace(
-            px.line(
-                trail_runs_2_years,
-                x='start_date',
-                y='total_elevation_gain',
-                color_discrete_sequence=['darkolivegreen'],  # Color for elevation line
-                labels={'total_elevation_gain': 'Total Elevation Gain'}
-            ).update_traces(yaxis='y2').data[0]
-        )
-
-        # Update layout to include a second y-axis
-        fig.update_layout(
-            yaxis2=dict(
-                title='Total Elevation Gain (ft)',
-                overlaying='y',
-                side='right'
-            )
-        )
-
-        # Show the figure
-        fig.update_traces(marker=dict(line=dict(width=3.9))) 
-        fig.update_layout(coloraxis_colorbar=dict(x=1.067))
         fig.show()
+         
 
     else:
         # Print an error message if the request was not successful

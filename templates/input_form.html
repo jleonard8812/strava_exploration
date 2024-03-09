@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strava Dashboard</title>
+</head>
+<body>
+    <h1>Strava Dashboard</h1>
+    <p>View your running data</p>
+
+    <form method="post">
+        <label for="athlete_id">Athlete ID:</label>
+        <input type="text" name="athlete_id" id="athlete_id" placeholder="Enter athlete ID" required>
+        <br>
+
+        <label for="days_back">Days Back:</label>
+        <input type="number" name="days_back" id="days_back" placeholder="Enter days back" required>
+        <br>
+
+        <input type="submit" value="Generate Dashboard">
+    </form>
+</body>
+</html>

@@ -2,7 +2,7 @@ import requests
 from creds import client_id, client_secret, redirect_uri, scopes
 
 
-authorization_code = '49b38ccce69c3a7244fca4d9fae186299170283c'
+authorization_code = '3fd2e6aa916ba57471c71d1748678448ce4657c1'
 # Construct the authorization URL
 authorization_url = f"https://www.strava.com/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&response_type=code&scope={scopes}&approval_prompt=auto"
 
