@@ -1,12 +1,17 @@
 import requests
-from creds import access_token, athlete_id
 import json
 import pandas as pd
 import plotly.express as px
+from flask import session
 
-def generate_plot(athlete_id, days_back):
+def generate_plot(days_back):
+    # Check if access token exists in the session
+    access_token = session.get('access_token')
+
+    if not access_token:
+        return "Error: Access token not found in session. User not authenticated."
     # Strava API endpoint for getting athlete activities
-    api_url = f'https://www.strava.com/api/v3/athletes/{athlete_id}/activities?per_page=200'
+    api_url = 'https://www.strava.com/api/v3/athlete/activities?per_page=200'
 
     # Set up headers with the access token
     headers = {'Authorization': f'Bearer {access_token}'}
@@ -48,7 +53,6 @@ def generate_plot(athlete_id, days_back):
             trail_runs_2_years.loc[:, 'total_elevation_gain'] *= 3.28084
             trail_runs_2_years.loc[:, 'average_speed'] *= 2.23694
 
-
             print("Creating scatter plot...")
             # Create a figure with two y-axes
             fig = px.scatter(
@@ -73,3 +77,4 @@ def generate_plot(athlete_id, days_back):
         print(f"HTTP Error: {e.response.status_code}, {e.response.text}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
