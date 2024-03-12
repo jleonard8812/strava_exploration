@@ -13,10 +13,10 @@ def generate_plot(athlete_id, days_back):
 
     # Set days back variable
     if days_back <= 0:
-        days_back  = (pd.to_datetime('today') - pd.DateOffset(days=30)).tz_localize(None)
+        days_back = (pd.to_datetime('today') - pd.DateOffset(days=30)).tz_localize(None)
     else:
-        days_back  = (pd.to_datetime('today') - pd.DateOffset(days=days_back)).tz_localize(None)
-    
+        days_back = (pd.to_datetime('today') - pd.DateOffset(days=days_back)).tz_localize(None)
+
     try:
         print("Sending request to Strava API...")
         # Make a GET request to the Strava API to get athlete activities
@@ -36,31 +36,34 @@ def generate_plot(athlete_id, days_back):
             df = pd.json_normalize(data)
 
             # Filter for trail runs and activities within the last 2 years
-            trail_runs = df[(df['type'] == 'Run') & (df['name'].str.contains('Trail', case=False, na=False))] #| (df['name'] == 'Leadville 100'))]
+            trail_runs = df[(df['type'] == 'Run') & (df['name'].str.contains('Trail', case=False, na=False))]
             trail_runs['start_date'] = pd.to_datetime(trail_runs['start_date'])
             trail_runs_2_years = trail_runs[
-                (trail_runs['start_date'].dt.tz_localize(None) >= days_back)
-            ]
+                trail_runs['start_date'].dt.tz_localize(None) >= days_back
+            ].copy()  # Use .copy() to avoid SettingWithCopyWarning
 
-            # Convert elevation from meters to feet
-            trail_runs_2_years['total_elevation_gain'] *= 3.28084
-            # Convert meters per second to mph
-            trail_runs_2_years['average_speed'] *= 2.23694
+            print(f"Number of rows in trail_runs_2_years: {len(trail_runs_2_years)}")
+            print(f"Head of trail_runs_2_years:\n{trail_runs_2_years.head()}")
+
+            trail_runs_2_years.loc[:, 'total_elevation_gain'] *= 3.28084
+            trail_runs_2_years.loc[:, 'average_speed'] *= 2.23694
+
+
+            print("Creating scatter plot...")
             # Create a figure with two y-axes
             fig = px.scatter(
-            trail_runs_2_years,
-            x='average_speed',
-            y='total_elevation_gain',
-            title='Elevation Gain vs Speed with Heart Rate',
-            labels={'total_elevation_gain': 'Total Elevation Gain (ft)', 'average_speed': 'Average Speed (mph)'},
-            color='average_heartrate',
-            size='average_heartrate',
-            hover_data=['start_date', 'name'],
-            color_continuous_scale='bluered',
-        )
-
-            fig.show()
-            
+                trail_runs_2_years,
+                x='average_speed',
+                y='total_elevation_gain',
+                title='Elevation Gain vs Speed with Heart Rate',
+                labels={'total_elevation_gain': 'Total Elevation Gain (ft)', 'average_speed': 'Average Speed (mph)'},
+                color='average_heartrate',
+                size='average_heartrate',
+                hover_data=['start_date', 'name'],
+                color_continuous_scale='bluered',
+            )
+            print(f"Type of object returned: {type(fig)}")
+            return fig
 
         else:
             # Print an error message if the request was not successful

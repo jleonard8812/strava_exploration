@@ -6,15 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strava Dashboard</title>
     <!-- Add any additional stylesheets or scripts as needed -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <h1>Strava Dashboard</h1>
     <p>Your Running Data Dashboard</p>
 
-    <!-- Add the generated plot here -->
-    <div id="plot">{{ plot|safe }}</div>
+    <!-- Add an empty div to render the Plotly figure -->
+    <div id="plotly-figure"></div>
+
+    <!-- Include a script to render the Plotly figure -->
+    <script>
+        // Parse the Plotly JSON string from the Flask template
+    // Parse the Plotly JSON string from the Flask template
+        var plotlyData = {{ plot|safe }};
+
+    // Render the Plotly figure in the specified div
+        Plotly.newPlot('plotly-figure', plotlyData.data, plotlyData.layout);
+    </script>
 
     <!-- You can add more content or customize the layout as needed -->
-
 </body>
 </html>

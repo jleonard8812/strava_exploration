@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strava Authentication</title>
+</head>
+<body>
+    <h1>Strava Authentication</h1>
+    <p>In order to authenticate your profile, please enter your Strava athlete ID:</p>
+    <form method="post" action= "{{ url_for('home') }}">
+        <label for="athlete_id">Athlete ID:</label>
+        <input type="text" name="athlete_id" id="athlete_id" placeholder="Enter your athlete ID" required>
+        <br>
+        <input type="submit" value="Authorize">
+    </form>
+</body>
+</html>
