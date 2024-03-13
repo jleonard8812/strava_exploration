@@ -12,17 +12,23 @@
     <h1>Strava Dashboard</h1>
     <p>Your Running Data Dashboard</p>
 
-    <!-- Add an empty div to render the Plotly figure -->
-    <div id="plotly-figure"></div>
+    <!-- Add empty divs to render the Plotly figures -->
+    <div id="scatter-plot"></div>
+    <div id="elevation-histogram"></div>
 
-    <!-- Include a script to render the Plotly figure -->
+    <!-- Include scripts to render the Plotly figures -->
     <script>
-        // Parse the Plotly JSON string from the Flask template
-    // Parse the Plotly JSON string from the Flask template
-        var plotlyData = {{ plot|safe }};
+        // Parse the scatter plot JSON data from the Flask template
+        var scatterPlotData = {{ plot|safe }}
 
-    // Render the Plotly figure in the specified div
-        Plotly.newPlot('plotly-figure', plotlyData.data, plotlyData.layout);
+        // Render the scatter plot
+        Plotly.newPlot('scatter-plot', scatterPlotData.data, scatterPlotData.layout)
+
+        // Parse the elevation histogram JSON data from the Flask template
+        var elevationHistData = {{ new_plot|safe }}
+
+        // Render the elevation histogram
+        Plotly.newPlot('elevation-histogram', elevationHistData.data, elevationHistData.layout)
     </script>
 
     <!-- You can add more content or customize the layout as needed -->

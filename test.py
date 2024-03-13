@@ -1,8 +1,8 @@
 import requests
 from creds import access_token, athlete_id
-from generate_plot import generate_plot
+from generate_histo import generate_histo
 
-gen = generate_plot(41534611, 25)
+gen = generate_histo(25)
 
 
 # # Strava API endpoint for getting activities

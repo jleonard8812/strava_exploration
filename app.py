@@ -3,7 +3,8 @@ import requests
 import os
 from creds import client_id, client_secret, redirect_uri, scopes
 import plotly.express as px
-from generate_plot import generate_plot 
+from generate_plot import generate_plot
+from generate_histo import generate_histo 
 import plotly.io as pio
 import plotly.offline as pyo
 from flask_session import Session 
@@ -40,20 +41,20 @@ def dashboard():
         # Retrieve the desired time range from the form
         days_back = int(request.form.get('days_back'))
 
-        # Generate the plot using the generate_plot function
-        fig = generate_plot(days_back)
-        print(f"Type of object returned: {type(fig)}")
+        # # Generate the plot using the generate_plot function
+        # fig = generate_plot(days_back)
+        # print(f"Type of object returned: {type(fig)}")
 
-        # Check if the figure is None
-        if fig is not None:
-            # Convert the plot to standalone HTML
-            plot_html = pio.to_html(fig, full_html=False)
-            plot_data_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-            print(f"Type of plot_html object returned: {type(plot_html)}")
-            return render_template('dashboard.html', plot=plot_html, plot_json=plot_data_json)
-        else:
-            # Handle the case where the figure is None (add your own logic)
-            return render_template('error.html', message='Failed to generate plot')
+        # # Check if the figure is None
+        # if fig is not None:
+        #     # Convert the plot to standalone HTML
+        #     plot_html = pio.to_html(fig, full_html=False)
+        #     plot_data_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        #     print(f"Type of plot_html object returned: {type(plot_html)}")
+        #     return render_template('dashboard.html', plot=plot_html, plot_json=plot_data_json)
+        # else:
+        #     # Handle the case where the figure is None (add your own logic)
+        #     return render_template('error.html', message='Failed to generate plot')
 
     elif request.method == 'GET':
         # Retrieve parameters from the query string for GET requests
@@ -63,13 +64,15 @@ def dashboard():
 
         # Generate the plot using the generate_plot function
         fig = generate_plot(days_back)
+        elevation_fig = generate_histo(days_back)
         print(f"Type of object returned: {type(fig)}")
         # Check if the figure is None
         if fig is not None:
             # Convert the plot to standalone HTML
             plot_data_json = fig.to_json()
+            elevation_fig_json = elevation_fig.to_json()
 
-            return render_template('dashboard.html', plot=plot_data_json)
+            return render_template('dashboard.html', plot=plot_data_json, new_plot=elevation_fig_json)
         else:
             # Handle the case where the figure is None (add your own logic)
             return render_template('error.html', message='Failed to generate plot')

@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 from flask import session
 
-def generate_plot(days_back):
+def generate_histo(days_back):
     # Check if access token exists in the session
     access_token = session.get('access_token')
 
@@ -53,21 +53,15 @@ def generate_plot(days_back):
             trail_runs_2_years.loc[:, 'total_elevation_gain'] *= 3.28084
             trail_runs_2_years.loc[:, 'average_speed'] *= 2.23694
 
-            print("Creating scatter plot...")
-            # Create a figure with two y-axes
-            fig = px.scatter(
-                trail_runs_2_years,
-                x='average_speed',
-                y='total_elevation_gain',
-                title='Elevation Gain vs Speed with Heart Rate',
-                labels={'total_elevation_gain': 'Total Elevation Gain (ft)', 'average_speed': 'Average Speed (mph)'},
-                color='average_heartrate',
-                size='average_heartrate',
-                hover_data=['start_date', 'name'],
-                color_continuous_scale='bluered',
-            )
+            print("Creating histogram...")            
+            elevation_hist = px.histogram(
+            trail_runs_2_years,
+            x='total_elevation_gain',
+            title='Elevation Gain Distribution',
+            labels={'total_elevation_gain': 'Total Elevation Gain (ft)', 'count': 'Frequency'},
+            nbins=20 )
 
-            return fig
+            return elevation_hist
 
         else:
             # Print an error message if the request was not successful
