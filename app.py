@@ -4,7 +4,6 @@ import os
 from creds import client_id, client_secret, redirect_uri, scopes
 import plotly.express as px
 from generate_plot import generate_plot
-from generate_histo import generate_histo 
 import plotly.io as pio
 import plotly.offline as pyo
 from flask_session import Session 
@@ -34,38 +33,17 @@ def input_form():
 
     return render_template('input_form.html')
 
-@app.route('/dashboard', methods=['GET', 'POST'])
+@app.route('/dashboard', methods=['GET'])
 def dashboard():
-
-    if request.method == 'POST':
-        # Retrieve the desired time range from the form
-        days_back = int(request.form.get('days_back'))
-
-        # # Generate the plot using the generate_plot function
-        # fig = generate_plot(days_back)
-        # print(f"Type of object returned: {type(fig)}")
-
-        # # Check if the figure is None
-        # if fig is not None:
-        #     # Convert the plot to standalone HTML
-        #     plot_html = pio.to_html(fig, full_html=False)
-        #     plot_data_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-        #     print(f"Type of plot_html object returned: {type(plot_html)}")
-        #     return render_template('dashboard.html', plot=plot_html, plot_json=plot_data_json)
-        # else:
-        #     # Handle the case where the figure is None (add your own logic)
-        #     return render_template('error.html', message='Failed to generate plot')
-
-    elif request.method == 'GET':
+    if request.method == 'GET':
         # Retrieve parameters from the query string for GET requests
         days_back = int(request.args.get('days_back'))
 
         print(f"Generating plot for days_back: {days_back}")
 
         # Generate the plot using the generate_plot function
-        fig = generate_plot(days_back)
-        elevation_fig = generate_histo(days_back)
-        print(f"Type of object returned: {type(fig)}")
+        fig, elevation_fig = generate_plot(days_back)
+
         # Check if the figure is None
         if fig is not None:
             # Convert the plot to standalone HTML
@@ -78,6 +56,7 @@ def dashboard():
             return render_template('error.html', message='Failed to generate plot')
 
     return render_template('input_form.html')
+
 
 
 @app.route('/callback')

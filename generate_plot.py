@@ -4,28 +4,35 @@ import pandas as pd
 import plotly.express as px
 from flask import session
 
-def generate_plot(days_back):
+def generate_plot(days_back=30, activity_type='Run'):
     # Check if access token exists in the session
     access_token = session.get('access_token')
 
     if not access_token:
         return "Error: Access token not found in session. User not authenticated."
+    
     # Strava API endpoint for getting athlete activities
-    api_url = 'https://www.strava.com/api/v3/athlete/activities?per_page=200'
+    api_url = 'https://www.strava.com/api/v3/athlete/activities'
 
     # Set up headers with the access token
     headers = {'Authorization': f'Bearer {access_token}'}
 
-    # Set days back variable
-    if days_back <= 0:
-        days_back = (pd.to_datetime('today') - pd.DateOffset(days=30)).tz_localize(None)
-    else:
-        days_back = (pd.to_datetime('today') - pd.DateOffset(days=days_back)).tz_localize(None)
+    # Calculate the end date based on the days_back parameter
+    end_date = pd.Timestamp.now().normalize()
+    start_date = end_date - pd.DateOffset(days=days_back)
+
+    # Parameters for the API request
+    params = {
+        'per_page': 200,
+        'before': int(end_date.timestamp()),  # Convert to Unix timestamp
+        'after': int(start_date.timestamp()),  # Convert to Unix timestamp
+        'type': activity_type  # Include activity type in parameters
+    }
 
     try:
         print("Sending request to Strava API...")
         # Make a GET request to the Strava API to get athlete activities
-        response = requests.get(api_url, headers=headers)
+        response = requests.get(api_url, headers=headers, params=params)
         response.raise_for_status()
 
         # Print response status code
@@ -39,26 +46,22 @@ def generate_plot(days_back):
 
             # Create a DataFrame from the JSON data
             df = pd.json_normalize(data)
+            print("Total number of activities returned:", len(df))
+            df = df.dropna(subset=['average_heartrate'])
+            
 
-            # Filter for trail runs and activities within the last 2 years
-            trail_runs = df[(df['type'] == 'Run') & (df['name'].str.contains('Trail', case=False, na=False))]
+            trail_runs = df.copy()
+
             trail_runs['start_date'] = pd.to_datetime(trail_runs['start_date'])
-            trail_runs_2_years = trail_runs[
-                trail_runs['start_date'].dt.tz_localize(None) >= days_back
-            ].copy()  # Use .copy() to avoid SettingWithCopyWarning
-
-            print(f"Number of rows in trail_runs_2_years: {len(trail_runs_2_years)}")
-            print(f"Head of trail_runs_2_years:\n{trail_runs_2_years.head()}")
-
-            trail_runs_2_years.loc[:, 'total_elevation_gain'] *= 3.28084
-            trail_runs_2_years.loc[:, 'average_speed'] *= 2.23694
+            trail_runs['total_elevation_gain'] *= 3.28084
+            trail_runs['average_speed'] *= 2.23694
 
             print("Creating scatter plot...")
             # Create a figure with two y-axes
             fig = px.scatter(
-                trail_runs_2_years,
-                x='average_speed',
-                y='total_elevation_gain',
+                trail_runs,
+                x='total_elevation_gain',
+                y='average_speed',
                 title='Elevation Gain vs Speed with Heart Rate',
                 labels={'total_elevation_gain': 'Total Elevation Gain (ft)', 'average_speed': 'Average Speed (mph)'},
                 color='average_heartrate',
@@ -67,7 +70,17 @@ def generate_plot(days_back):
                 color_continuous_scale='bluered',
             )
 
-            return fig
+            print("Creating histogram...")            
+            elevation_hist = px.histogram(
+                trail_runs,
+                x='total_elevation_gain',
+                title='Elevation Gain Distribution',
+                labels={'total_elevation_gain': 'Total Elevation Gain (ft)', 'count': '# of Runs'},
+                nbins=20
+            )
+            elevation_hist.update_yaxes(title_text='Number of Runs')
+
+            return fig, elevation_hist
 
         else:
             # Print an error message if the request was not successful
@@ -77,4 +90,3 @@ def generate_plot(days_back):
         print(f"HTTP Error: {e.response.status_code}, {e.response.text}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
